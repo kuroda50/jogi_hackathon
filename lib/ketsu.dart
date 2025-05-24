@@ -1,5 +1,8 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
+import 'dart:async';
+import 'dart:math';
+import 'package:jogi_hackathon/ki.dart';
 
 class Ketsu extends StatefulWidget {
   const Ketsu({super.key});
@@ -9,10 +12,14 @@ class Ketsu extends StatefulWidget {
 }
 
 class _KetsuState extends State<Ketsu> {
+  final List<Offset> _bloodPositions = [];
+  final Random _random = Random();
+
   @override
   void initState() {
     super.initState();
-    // _playJumpScare();
+    playJumpScare();
+    _spawnBlood();
   }
 
   @override
@@ -31,8 +38,50 @@ class _KetsuState extends State<Ketsu> {
                 child: Image.asset("assets/horror430_TP_V.webp"),
               ),
             ),
+            // 血の画像を時間差で出す
+            for (final position in _bloodPositions)
+              Positioned(
+                left: position.dx,
+                top: position.dy,
+                child: Image.asset(
+                  'assets/30392738_p2_master1200_transparent.png',
+                  width: 200,
+                  height: 200,
+                ),
+              ),
+            // 最初に戻るボタン
+            Positioned(
+              bottom: 50,
+              left: 20,
+              child: FloatingActionButton(
+                onPressed: () {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => const KiDart()),
+                    (Route<dynamic> route) => false, // 全ての前の画面を削除
+                  );
+                },
+                child: const Icon(Icons.refresh),
+                backgroundColor: Colors.red,
+              ),
+            ),
           ],
         ));
+  }
+
+  void _spawnBlood() async {
+    for (int i = 0; i < 5; i++) {
+      await Future.delayed(const Duration(seconds: 1));
+      if (mounted) {
+        // ウィジェットがまだマウントされているかチェック
+        setState(() {
+          _bloodPositions.add(Offset(
+            _random.nextDouble() * 300 + 50, // 横方向ランダム (例: 50〜350)
+            _random.nextDouble() * 400 + 100, // 縦方向ランダム (例: 100〜500)
+          ));
+        });
+      }
+    }
   }
 }
 
