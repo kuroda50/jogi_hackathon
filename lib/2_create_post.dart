@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:jogi_hackathon/countdown_screen.dart';
+import 'package:jogi_hackathon/3_countdown_screen.dart';
 import 'package:jogi_hackathon/models/theme_data.dart';
 
 class CreatePostScreen extends StatefulWidget {

@@ -2,7 +2,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:math';
-import 'package:jogi_hackathon/theme_selection_screen.dart';
+import 'package:jogi_hackathon/1_theme_selection_screen.dart';
 
 class GameOverScreen extends StatefulWidget {
   const GameOverScreen({super.key});

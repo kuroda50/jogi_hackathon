@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:jogi_hackathon/game_over_screen.dart';
+import 'package:jogi_hackathon/4_game_over_screen.dart';
 
 void main(){
   return runApp(const MyApp());

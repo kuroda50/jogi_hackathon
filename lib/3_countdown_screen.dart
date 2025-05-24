@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/services.dart'; // 音声再生用
-import 'game_over_screen.dart';
+import '4_game_over_screen.dart';
 
 class CountdownScreen extends StatefulWidget {
   const CountdownScreen({super.key});

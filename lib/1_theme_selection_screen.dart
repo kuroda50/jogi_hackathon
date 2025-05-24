@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:jogi_hackathon/create_post.dart';
+import 'package:jogi_hackathon/2_create_post.dart';
 import 'package:jogi_hackathon/models/theme_data.dart';
 
 class ThemeSelectionScreen extends StatelessWidget {
