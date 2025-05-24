@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flutter/services.dart'; // 音声再生用
 import '4_game_over_screen.dart';
+import 'services/ai.dart'; // AIサービスをインポート
 
 class CountdownScreen extends StatefulWidget {
   const CountdownScreen({super.key});
@@ -26,12 +27,14 @@ class _CountdownScreenState extends State<CountdownScreen> with TickerProviderSt
   ];
   String _currentMessage = "";
   final Random _random = Random();
+  final GeminiApiService _apiService = GeminiApiService(); // AIサービスのインスタンス
+  String _evaluationResult = ''; // AIの評価結果を格納
+  bool _isScary = false; // 恐怖演出フラグ
 
   @override
   void initState() {
     super.initState();
-    _currentMessage = _messages[_random.nextInt(_messages.length)];
-    _startTimer();
+
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 1),
@@ -44,16 +47,17 @@ class _CountdownScreenState extends State<CountdownScreen> with TickerProviderSt
 
     _colorController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 1), // 点滅の頻度を控えめに
+      duration: const Duration(seconds: 1),
     )..addListener(() {
         setState(() {
-          // 背景色を控えめに変更（暗めの赤と黒を使用）
           _backgroundColor = _random.nextInt(10) < 2
-              ? Colors.red.withOpacity(0.5) // 暗めの赤
+              ? Colors.red.withOpacity(0.5)
               : Colors.black;
         });
       });
 
+    _currentMessage = _messages[_random.nextInt(_messages.length)];
+    _startTimer();
     _updateMessage();
   }
 
@@ -64,7 +68,7 @@ class _CountdownScreenState extends State<CountdownScreen> with TickerProviderSt
           timer.cancel();
           _navigateToGameOver();
         } else {
-          _timeRemaining -= 0.1;
+          // _timeRemaining -= 0.1;
           if (_timeRemaining <= 1.0) {
             _shakeController.forward(from: 0.0); // 揺れを開始
             _playTickSound(); // 音を再生
@@ -95,7 +99,7 @@ class _CountdownScreenState extends State<CountdownScreen> with TickerProviderSt
           children: [
             Positioned.fill(
               child: Image.asset(
-                'assets/kazukihiro512099_TP_V.jpg', // 不気味な画像
+                'kazukihiro512099_TP_V.jpg', // 不気味な画像
                 fit: BoxFit.cover,
               ),
             ),
@@ -121,6 +125,101 @@ class _CountdownScreenState extends State<CountdownScreen> with TickerProviderSt
     SystemSound.play(SystemSoundType.alert); // 不気味な音を再生
   }
 
+  Future<void> _evaluateHumor() async {
+    final List<Map<String, String>> inputData = [
+      // {"cause": "バナナの皮で滑って転倒", "will": "冷蔵庫のプリンは妹のもの"},
+      // {"cause": "スライムに溺れて", "will": "世界は平和だった"},
+      // {"cause": "無限ループに巻き込まれた", "will": "breakを忘れるな"},
+      {"cause": "バナナの皮で滑って転倒", "will": "以上です"},
+      {"cause": "スライムに溺れて", "will": "終了します"},
+      {"cause": "無限ループに巻き込まれた", "will": "保存してください"}
+    ];
+    try {
+      final List<Map<String, dynamic>> result =
+          await _apiService.evaluateHumor(inputData);
+      setState(() {
+        _evaluationResult = result.toString();
+
+        // 面白い数と面白くない数をカウント
+        final int funnyCount =
+            result.where((item) => item['面白い'] == true).length;
+        final int notFunnyCount =
+            result.where((item) => item['面白い'] == false).length;
+
+        // 面白くなければ、怖がらせる
+        _isScary = funnyCount < notFunnyCount;
+      });
+
+      if (_isScary) {
+        _triggerHorrorEffect(); // 恐怖演出をトリガー
+      } else {
+        _triggerBrightEffect(); // 明るい演出をトリガー
+      }
+    } catch (e) {
+      setState(() {
+        _evaluationResult = 'エラーが発生しました: $e';
+        print(_evaluationResult);
+      });
+    }
+  }
+
+  void _triggerHorrorEffect() {
+    // 背景色を赤に変更
+    setState(() {
+      _backgroundColor = Colors.red.withOpacity(0.8);
+    });
+
+    // 恐怖音を再生
+    playJumpScare();
+  }
+
+  void _triggerBrightEffect() {
+    // 背景色を明るい色に変更
+    setState(() {
+      _backgroundColor = Colors.blue[50]!; // 明るい背景色
+    });
+
+    // ポジティブなメッセージを表示
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Text(
+            '良い結果！',
+            style: TextStyle(
+              color: Colors.black87,
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+            ),
+          ),
+          content: const Text(
+            '面白い結果が得られました！次に進みましょう！',
+            style: TextStyle(
+              color: Colors.black54,
+              fontSize: 16,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text(
+                '閉じる',
+                style: TextStyle(color: Colors.blue),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   void dispose() {
     _timer.cancel();
@@ -138,49 +237,31 @@ class _CountdownScreenState extends State<CountdownScreen> with TickerProviderSt
         backgroundColor: Colors.black,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: AnimatedBuilder(
-        animation: _shakeController,
-        builder: (context, child) {
-          final offset =
-              _shakeController.value * 10.0 * (_random.nextBool() ? 1 : -1);
-          return Transform.translate(
-            offset: Offset(offset, offset),
-            child: child,
-          );
-        },
-        child: Stack(
-          children: [
-            Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const SizedBox(height: 50),
-                  Text(
-                    _timeRemaining.toStringAsFixed(1),
-                    style: const TextStyle(
-                      color: Colors.red,
-                      fontSize: 48,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  FadeTransition(
-                    opacity: _animationController,
-                    child: Text(
-                      _currentMessage,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontStyle: FontStyle.italic,
-                        fontFamily: 'Creepster', // 不気味なフォント
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          ElevatedButton(
+            onPressed: _evaluateHumor, // 評価を開始
+            child: const Text('評価を開始'),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            _evaluationResult,
+            style: TextStyle(
+              fontSize: 18,
+              color: _isScary ? Colors.red : Colors.white, // 面白くない場合は赤文字
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            _timeRemaining.toStringAsFixed(1), // カウントダウン表示
+            style: const TextStyle(
+              color: Colors.red,
+              fontSize: 48,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
       ),
     );
   }
