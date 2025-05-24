@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:device_preview/device_preview.dart';
-import 'package:jogi_hackathon/theme_selection_screen.dart';
+import 'package:jogi_hackathon/1_theme_selection_screen.dart';
 
 void main() {
   runApp(
