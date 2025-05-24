@@ -36,7 +36,7 @@ class _KetsuState extends State<Ketsu> {
   }
 }
 
-Future<void> _playJumpScare() async {
+Future<void> playJumpScare() async {
   final player = AudioPlayer();
   await player.play(AssetSource('hito_ge_himei01.mp3'));
 }

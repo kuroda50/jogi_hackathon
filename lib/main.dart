@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:device_preview/device_preview.dart';
-import 'package:jogi_hackathon/ki.dart';
-import 'package:jogi_hackathon/themelist.dart';
+import 'package:jogi_hackathon/ten.dart';
+// import 'package:jogi_hackathon/ki.dart';
+import 'package:jogi_hackathon/theme_list.dart';
+import 'timeshow.dart';
 
 void main() {
   runApp(
@@ -24,7 +26,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: KiDart(),
+      home: Ten(),
       useInheritedMediaQuery: true, // DevicePreview対応
       builder: DevicePreview.appBuilder, // DevicePreview対応
       locale: DevicePreview.locale(context), // DevicePreview対応
