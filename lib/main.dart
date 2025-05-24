@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:jogi_hackathon/1_theme_selection_screen.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
+Future<void> main() async{
+  await dotenv.load(fileName: 'env');  // .envファイルを読み込む
   runApp(
     DevicePreview(
       enabled: true,
