@@ -28,6 +28,7 @@ cd ogiri-server
 ```bash
 go mod download
 go mod init ogiri-server
+go get github.com/gorilla/mux
 ```
 
 3. サーバーの実行
