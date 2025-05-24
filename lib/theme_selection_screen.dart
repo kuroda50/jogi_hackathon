@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:jogi_hackathon/creaate_post.dart';
+import 'package:jogi_hackathon/create_post.dart';
 import 'package:jogi_hackathon/models/theme_data.dart';
 
-class KiDart extends StatelessWidget {
-  const KiDart({super.key});
+class ThemeSelectionScreen extends StatelessWidget {
+  const ThemeSelectionScreen({super.key});
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,7 +52,7 @@ class KiDart extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => BananaScreen(
+                              builder: (context) => CreatePostScreen(
                                 selectedTheme: theme.text,
                                 selectedImageUrl: theme.imageUrl,
                               ),
@@ -140,27 +140,7 @@ class KiDart extends StatelessWidget {
                   );
                 },
               ),
-            ), // 次の画面への遷移ボタン（デフォルトのお題で遷移）
-            Positioned(
-              bottom: 50,
-              right: 20,
-              child: FloatingActionButton(
-                onPressed: () {
-                  final randomTheme = GameThemes.getRandomTheme();
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => BananaScreen(
-                        selectedTheme: randomTheme.text,
-                        selectedImageUrl: randomTheme.imageUrl,
-                      ),
-                    ),
-                  );
-                },
-                child: const Icon(Icons.arrow_forward),
-                backgroundColor: Colors.orange,
-              ),
-            ),
+            ), 
           ],
         ),
       ),

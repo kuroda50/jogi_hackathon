@@ -1,65 +1,51 @@
 import 'package:flutter/material.dart';
-import 'package:jogi_hackathon/ten.dart';
+import 'package:jogi_hackathon/countdown_screen.dart';
+import 'package:jogi_hackathon/models/theme_data.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: BananaScreen(
-        selectedTheme: 'デフォルトのお題',
-        selectedImageUrl: 'https://via.placeholder.com/150',
-      ),
-    );
-  }
-}
-
-class BananaScreen extends StatefulWidget {
+class CreatePostScreen extends StatefulWidget {
   final String selectedTheme;
   final String selectedImageUrl;
 
-  const BananaScreen({
+  const CreatePostScreen({
     super.key,
     required this.selectedTheme,
     required this.selectedImageUrl,
   });
-
   @override
-  BananaScreenState createState() => BananaScreenState();
+  CreatePostScreenState createState() => CreatePostScreenState();
 }
 
-class BananaScreenState extends State<BananaScreen> {
+class CreatePostScreenState extends State<CreatePostScreen> {
   final TextEditingController controller = TextEditingController(); // 入力管理
   int pressCount = 0; //確定ボタンを押した回数
-
-  //お題と画像リスト
-  final List<String> topics = [
-    'バナナの皮で滑った',
-    '階段から転げ落ちた',
-    'UFOに連れ去られた',
+  // GameThemesから取得したお題データを使用
+  List<ThemeItem> get _themeItems => [
+    GameThemes.getThemeAt(0),
+    GameThemes.getThemeAt(1),
+    GameThemes.getThemeAt(2),
   ];
-  final List<String> images = [
-    'https',
-    'https',
-    'https',
-  ];
-  final List<String> examples = [
-    '例/そんなバカな',
-    '例/バナナの皮で耐えることはできたのに（泣）',
-    '例/UFOを撃墜できれば...',
-  ];
+  
+  // お題のテキストだけを取得するゲッター
+  List<String> get topics => _themeItems.map((theme) => theme.text).toList();
+  
+  // 画像URLだけを取得するゲッター
+  List<String> get images => _themeItems.map((theme) => theme.imageUrl).toList();
+    // カウントのみ使用
+  final int maxPressCount = 3;
 
-  late String userText; //初期メッセージ
-
-  @override
+  late String userText; //初期メッセージ  @override
   void initState() {
     super.initState();
-    // 選択されたお題に応じて初期メッセージを設定
-    userText = '例: 「${widget.selectedTheme}」なんて...';
+    // 初期メッセージを設定
+    userText = '「${widget.selectedTheme}」によって...';
+    
+    // TextFieldに初期テキストも設定しておく
+    controller.addListener(() {
+      // テキストが空の場合はデフォルトメッセージを表示
+      if (controller.text.isEmpty) {
+        userText = '「${widget.selectedTheme}」によって...';
+      }
+    });
   }
 
   @override
@@ -118,9 +104,8 @@ class BananaScreenState extends State<BananaScreen> {
                     Image.network(
                       widget.selectedImageUrl, // 選択された画像を使用
                       width: 200,
-                    ),
-                    Text(
-                      topics[pressCount.clamp(0, 2)],
+                    ),                    Text(
+                      widget.selectedTheme, // 選択されたお題を表示
                       style: const TextStyle(
                         color: Colors.white,
                         backgroundColor: Colors.black54,
@@ -130,16 +115,28 @@ class BananaScreenState extends State<BananaScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 30),
-
-              // テキスト表示部（ユーザー入力反映）
-              Container(
+              const SizedBox(height: 30),              // テキスト表示部（ユーザー入力反映）
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
                 padding: const EdgeInsets.all(20),
-                color: Colors.blue[900],
+                margin: const EdgeInsets.symmetric(horizontal: 20),
+                decoration: BoxDecoration(
+                  color: Colors.blue[900],
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
                 child: Container(
-                  color: Colors.cyanAccent[400],
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                  decoration: BoxDecoration(
+                    color: Colors.cyanAccent[400],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
                   child: Text(
                     userText,
                     style: const TextStyle(
@@ -147,52 +144,62 @@ class BananaScreenState extends State<BananaScreen> {
                       fontWeight: FontWeight.bold,
                       color: Colors.black,
                     ),
+                    textAlign: TextAlign.center,
                   ),
                 ),
-              ),
-
-              const SizedBox(height: 20),
-
-              // 入力欄とボタン
+              ),const SizedBox(height: 20),              // 入力欄 - 入力時に自動更新するように変更
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 30),
                 child: TextField(
                   controller: controller,
+                  onChanged: (text) {
+                    // テキスト変更時に自動的に表示を更新
+                    setState(() {
+                      userText = text.isEmpty ? '「${widget.selectedTheme}」によって...' : text;
+                    });
+                  },
                   decoration: InputDecoration(
                     labelText: '最後の言葉を入力してください',
                     hintText: '「${widget.selectedTheme}」の状況で言いそうなこと...',
                     border: const OutlineInputBorder(),
                   ),
                 ),
-              ),
-              const SizedBox(height: 10),
+              ),              const SizedBox(height: 20),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                  textStyle: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 onPressed: () {
                   setState(() {
-                    userText = controller.text;
-                  });
-                },
-                child: const Text('更新'),
-              ),
-
-              const SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    // 入力内容でuserTxetを更新
                     pressCount++;
-                    if (pressCount < 3) {
-                      userText = examples[pressCount.clamp(0, 2)];
+                    
+                    if (pressCount < maxPressCount) {
+                      // まだカウントが残っている場合
                       controller.clear();
+                      // デフォルトのテキストを表示
+                      userText = '「${widget.selectedTheme}」によって...';
                     } else {
+                      // 最後の確定ボタンクリックでカウントダウン画面へ
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const Ten()),
+                        MaterialPageRoute(builder: (context) => const CountdownScreen()),
                       );
                     }
                   });
                 },
-                child: const Text('確定'),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(pressCount < maxPressCount - 1 ? '次へ進む' : '決定'),
+                    const SizedBox(width: 8),
+                    Icon(pressCount < maxPressCount - 1 ? Icons.arrow_forward : Icons.check_circle),
+                  ],
+                ),
               ),
             ],
           ),

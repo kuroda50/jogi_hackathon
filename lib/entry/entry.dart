@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:jogi_hackathon/ketsu.dart';
+import 'package:jogi_hackathon/game_over_screen.dart';
 
 void main(){
   return runApp(const MyApp());
@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const Ketsu(),
+      home: const GameOverScreen(),
     );
   }
 }
